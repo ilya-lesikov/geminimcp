@@ -13,6 +13,61 @@
 </div>
 
 ---
+## 零、效果示例
+
+**1.** 本次测评使用**完全相同**的提示词。使用 / 不使用本项目的效果如下所示，可以看到，使用了Gemini-MCP后的前端网页无论是在审美布局还是在动画特效上都明显优于仅使用claude code进行前端编码的版本。
+  <details>
+  <summary>点击查看提示词详情。</summary>
+
+  ```
+  设计一张极致精美的天气卡片，用于超高清大屏海报展示。
+
+  整体氛围：深冬雪景，中国风水墨意境，画面要有「静」与「远」的诗意，仿佛一眼望去就能听见雪落的声音。
+
+  背景：远景是连绵起伏的山脉，采用中国水墨山水的笔触，层层叠叠，虚实相间，有 atmospheric perspective 的层次感；山间有薄雾与云气缭绕，隐约可见几棵苍松或一座小亭，增加东方韵味和故事感。
+
+  色调：以冷青蓝、墨灰、苍白为主，局部点缀一点温暖的灯光或朱红印章，让画面在寒意中有一点人间烟火。
+
+  天气卡片本体：
+
+  作为画面主体，布局偏中间略右或略左，大小适合大屏阅读，留足呼吸感与留白。
+  不是毛玻璃风格，避免玻璃态、磨砂玻璃、强烈模糊效果。
+  采用更高级的卡片质感：类似宣纸、细腻磨砂金属或温润玉石，一侧有柔和高光和细微阴影，边缘略带中国传统窗格、回纹或细线描边，整体极简、干净。
+  信息排版克制且有节奏：城市名与当前温度可用带有行书/楷书气质的中文字体或与之相匹配的优雅英文字体，小号文字用于日期、天气描述和空气质量等，中英混排自然协调。
+  雪花效果（WebGL）：
+
+  雪花不是简单粒子点，而是用 WebGL 创建的精致雪花：具有六角对称的晶体结构，边缘细腻，带微光反射。
+  雪花分前景、中景、远景多层深度，大小、透明度与锐度随距离变化，营造强烈空间感。
+  飘落轨迹带有轻微旋转与摆动，有缓慢加速和微随机的风向变化，整体运动优雅、克制，不喧宾夺主。
+  部分雪花掠过天气卡片边缘，形成轻微遮挡关系，加强「卡片在雪中」的沉浸感。
+  风格要求：
+
+  整体中国风现代化融合：水墨山水 + 极简 UI 设计。
+  画面高分辨率、适配 16:9 大屏海报。
+  构图讲究留白与平衡，富有东方韵味与时间流逝的宁静感。
+  体现「最高水准」的精细度、质感和氛围，而非普通界面截图。
+  ```
+
+  </details>
+
+**2.** 在Claude Code中**使用Gemini-MCP**。
+
+<iframe height="300" style="width: 100%;" scrolling="no" title="《深冬雪境 · 天气卡片》CC with GeminiMCP" src="https://codepen.io/Studio-Guda/embed/yyOpBVZ?default-tab=&theme-id=light" frameborder="no" loading="lazy" allowtransparency="true">
+      See the Pen <a href="https://codepen.io/Studio-Guda/pen/yyOpBVZ">
+  《深冬雪境 · 天气卡片》CC with GeminiMCP</a> by Studio Guda (<a href="https://codepen.io/Studio-Guda">@Studio-Guda</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+
+**3.** 仅使用Claude Code。
+
+<iframe height="300" style="width: 100%;" scrolling="no" title="《深冬雪境 · 天气卡片》CC " src="https://codepen.io/Studio-Guda/embed/ogxpvGY?default-tab=&theme-id=light" frameborder="no" loading="lazy" allowtransparency="true">
+      See the Pen <a href="https://codepen.io/Studio-Guda/pen/ogxpvGY">
+  《深冬雪境 · 天气卡片》CC </a> by Studio Guda (<a href="https://codepen.io/Studio-Guda">@Studio-Guda</a>)
+  on <a href="https://codepen.io">CodePen</a>.
+</iframe>
+
+---
 
 ## 一、项目简介
 
