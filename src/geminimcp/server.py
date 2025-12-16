@@ -7,6 +7,7 @@ import os
 import queue
 import subprocess
 import threading
+import time
 import uuid
 from pathlib import Path
 from typing import Annotated, Any, Dict, Generator, List, Literal, Optional
@@ -18,11 +19,12 @@ import shutil
 mcp = FastMCP("Gemini MCP Server-from guda.studio")
 
 
-def run_shell_command(cmd: list[str]) -> Generator[str, None, None]:
+def run_shell_command(cmd: list[str], cwd: str | None = None) -> Generator[str, None, None]:
     """Execute a command and stream its output line-by-line.
 
     Args:
         cmd: Command and arguments as a list (e.g., ["gemini", "-o", "stream-json", "--", "prompt"])
+        cwd: Working directory for the command
 
     Yields:
         Output lines from the command
@@ -44,6 +46,7 @@ def run_shell_command(cmd: list[str]) -> Generator[str, None, None]:
         stderr=subprocess.STDOUT,
         universal_newlines=True,
         encoding='utf-8',
+        cwd=cwd,
     )
 
     output_queue: queue.Queue[str | None] = queue.Queue()
@@ -146,6 +149,7 @@ def windows_escape(prompt):
 )
 async def gemini(
     PROMPT: Annotated[str, "Instruction for the task to send to gemini."],
+    cd: Annotated[Path, "Set the workspace root for gemini before executing the task."],
     sandbox: Annotated[
         bool,
         Field(description="Run in sandbox mode. Defaults to `False`."),
@@ -164,6 +168,11 @@ async def gemini(
     ] = "",
 ) -> Dict[str, Any]:
     """Execute a gemini CLI session and return the results."""
+    
+    if not cd.exists():
+        success = False
+        err_message = f"The workspace root directory `{cd.absolute().as_posix()}` does not exist. Please check the path and try again."
+        return {"success": success, "error": err_message}
 
     if os.name == "nt":
         PROMPT = windows_escape(PROMPT)
@@ -187,7 +196,7 @@ async def gemini(
     err_message = ""
     thread_id: Optional[str] = None
 
-    for line in run_shell_command(cmd):
+    for line in run_shell_command(cmd, cwd=cd.absolute().as_posix()):
         try:
             line_dict = json.loads(line.strip())
             all_messages.append(line_dict)
