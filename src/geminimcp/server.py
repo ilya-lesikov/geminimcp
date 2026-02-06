@@ -175,12 +175,11 @@ async def gemini(
     except Exception:
         allowed_roots = []
 
-    if not allowed_roots:
-        return {"success": False, "error": "No workspace roots provided by MCP client."}
-
     resolved_cd = cd.resolve()
-    if not any(resolved_cd == root or root in resolved_cd.parents for root in allowed_roots):
-        return {"success": False, "error": f"Directory {cd} is not within any allowed workspace root."}
+
+    if allowed_roots:
+        if not any(resolved_cd == root or root in resolved_cd.parents for root in allowed_roots):
+            return {"success": False, "error": f"Directory {cd} is not within any allowed workspace root."}
 
     if not resolved_cd.exists():
         return {"success": False, "error": f"Directory {resolved_cd} does not exist."}
