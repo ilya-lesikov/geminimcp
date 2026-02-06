@@ -12,7 +12,7 @@ import uuid
 from pathlib import Path
 from typing import Annotated, Any, Dict, Generator, List, Literal, Optional
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp import FastMCP, Context
 from pydantic import BeforeValidator, Field
 import shutil
 
@@ -130,8 +130,8 @@ def windows_escape(prompt):
 @mcp.tool(
     name="gemini",
     description="""
-    Invokes the Gemini CLI to execute AI-driven tasks, returning structured JSON events and a session identifier for conversation continuity. 
-    
+    Invokes the Gemini CLI to execute AI-driven tasks, returning structured JSON events and a session identifier for conversation continuity.
+
     **Return structure:**
         - `success`: boolean indicating execution status
         - `SESSION_ID`: unique identifier for resuming this conversation in future calls
@@ -148,12 +148,9 @@ def windows_escape(prompt):
     meta={"version": "0.0.0", "author": "guda.studio"},
 )
 async def gemini(
+    ctx: Context,
     PROMPT: Annotated[str, "Instruction for the task to send to gemini."],
     cd: Annotated[Path, "Set the workspace root for gemini before executing the task."],
-    sandbox: Annotated[
-        bool,
-        Field(description="Run in sandbox mode. Defaults to `False`."),
-    ] = False,
     SESSION_ID: Annotated[
         str,
         "Resume the specified session of the gemini. Defaults to empty string, start a new session.",
@@ -168,21 +165,33 @@ async def gemini(
     ] = "",
 ) -> Dict[str, Any]:
     """Execute a gemini CLI session and return the results."""
-    
-    if not cd.exists():
-        success = False
-        err_message = f"The workspace root directory `{cd.absolute().as_posix()}` does not exist. Please check the path and try again."
-        return {"success": success, "error": err_message}
+
+    # Validate cd against MCP client workspace roots.
+    try:
+        roots_result = await ctx.session.list_roots()
+        allowed_roots = [
+            Path(r.uri.removeprefix("file://")).resolve() for r in roots_result.roots
+        ]
+    except Exception:
+        allowed_roots = []
+
+    if not allowed_roots:
+        return {"success": False, "error": "No workspace roots provided by MCP client."}
+
+    resolved_cd = cd.resolve()
+    if not any(resolved_cd == root or root in resolved_cd.parents for root in allowed_roots):
+        return {"success": False, "error": f"Directory {cd} is not within any allowed workspace root."}
+
+    if not resolved_cd.exists():
+        return {"success": False, "error": f"Directory {resolved_cd} does not exist."}
 
     if os.name == "nt":
         PROMPT = windows_escape(PROMPT)
     else:
         PROMPT = PROMPT
 
-    cmd = ["gemini", "--prompt", PROMPT, "-o", "stream-json"]
-
-    if sandbox:
-        cmd.extend(["--sandbox"])
+    cmd = ["gemini", "--prompt", PROMPT, "-o", "stream-json",
+           "--sandbox", "--approval-mode", "plan"]
 
     if model:
         cmd.extend(["--model", model])
@@ -249,7 +258,7 @@ async def gemini(
         }
     else:
         result = {"success": False, "error": err_message}
-    
+
     if return_all_messages:
         result["all_messages"] = all_messages
 
